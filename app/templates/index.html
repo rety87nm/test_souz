@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI-помощник для товарных описаний</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">AI</div>
+      <div>
+        <h1>Генератор карточек товаров</h1>
+        <p>Черновики для B2B-каталога контрольно-измерительных приборов</p>
+      </div>
+    </div>
+    <div class="health" id="health">
+      <span class="dot"></span>
+      <span id="health-text">Проверка LLM…</span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel input-panel">
+      <div class="panel-head">
+        <h2>Данные о приборе</h2>
+        <div class="mode-switch" role="tablist">
+          <button type="button" class="mode-btn active" data-mode="form">Форма</button>
+          <button type="button" class="mode-btn" data-mode="json">JSON</button>
+        </div>
+      </div>
+
+      <div class="examples" id="examples"></div>
+
+      <form id="product-form" autocomplete="off">
+        <label>
+          <span>Название товара <b>*</b></span>
+          <input id="name" name="name" type="text" placeholder="Манометр показывающий DM 02" required>
+        </label>
+
+        <label>
+          <span>Производитель</span>
+          <input id="manufacturer" name="manufacturer" type="text" placeholder="Манотомь">
+        </label>
+
+        <fieldset class="specs-fieldset">
+          <legend>Ключевые характеристики</legend>
+          <div id="specs-rows" class="specs-rows"></div>
+          <button type="button" class="btn ghost small" id="add-spec">+ Добавить характеристику</button>
+        </fieldset>
+
+        <label>
+          <span>Описание или фрагмент технического паспорта</span>
+          <textarea id="description" name="description" rows="5" placeholder="Прибор предназначен для измерения…"></textarea>
+        </label>
+
+        <button type="submit" class="btn primary" id="submit-btn">
+          <span class="btn-text">Сформировать карточку</span>
+          <span class="spinner" aria-hidden="true"></span>
+        </button>
+      </form>
+
+      <div id="json-editor" class="json-editor hidden">
+        <p class="hint">Вставьте JSON с полями <code>name</code>, <code>manufacturer</code>, <code>specs</code>, <code>description</code>.</p>
+        <textarea id="json-input" rows="18" spellcheck="false"></textarea>
+        <button type="button" class="btn primary" id="json-submit">Сформировать карточку</button>
+      </div>
+
+      <div class="alert error hidden" id="error-box" role="alert"></div>
+    </section>
+
+    <section class="panel result-panel">
+      <div class="panel-head">
+        <h2>Результат</h2>
+        <div class="actions hidden" id="result-actions">
+          <button type="button" class="btn ghost small" id="copy-md">Копировать Markdown</button>
+          <button type="button" class="btn ghost small" id="copy-json">Копировать JSON</button>
+        </div>
+      </div>
+
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">◫</div>
+        <h3>Карточка появится здесь</h3>
+        <p>Заполните форму или загрузите пример, затем нажмите «Сформировать карточку».</p>
+      </div>
+
+      <div id="result" class="result hidden">
+        <div class="result-head">
+          <h3 id="result-title"></h3>
+          <p class="result-meta" id="result-meta"></p>
+        </div>
+
+        <section class="result-section">
+          <h4>SEO-описание</h4>
+          <div id="result-description" class="description-text"></div>
+        </section>
+
+        <section class="result-section">
+          <h4>Ключевые характеристики</h4>
+          <table class="specs-table">
+            <thead><tr><th>Характеристика</th><th>Значение</th></tr></thead>
+            <tbody id="result-specs"></tbody>
+          </table>
+        </section>
+
+        <section class="result-section">
+          <h4>Поисковые запросы</h4>
+          <div class="chips" id="result-queries"></div>
+        </section>
+
+        <section class="result-section">
+          <h4>Коммерческий блок</h4>
+          <div id="result-commercial" class="commercial"></div>
+        </section>
+
+        <section class="result-section">
+          <h4>Недостающие данные</h4>
+          <ul class="missing-list" id="result-missing"></ul>
+        </section>
+
+        <section class="result-section warnings hidden" id="warnings-section">
+          <h4>Предупреждения</h4>
+          <ul class="warnings-list" id="result-warnings"></ul>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const EXAMPLES = {{ examples | tojson }};
+  </script>
+  <script src="{{ url_for('static', path='app.js') }}"></script>
+</body>
+</html>
